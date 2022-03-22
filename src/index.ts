@@ -1,7 +1,5 @@
+import { Client, Intents, Message } from "discord.js";
 import "dotenv/config";
-
-import { Client, Intents, Collection, Permissions } from "discord.js";
-import { Message } from "discord.js";
 import { Configuration, OpenAIApi } from "openai";
 
 export const client = new Client({
@@ -20,22 +18,21 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 client.on("messageCreate", async (message: Message) => {
-  if (message.channelId != "949957037536706610") return;
+  if (message.channelId != process.env.NICK_CHANNEL) return;
   if (message.author.bot) return;
 
   message.channel.sendTyping();
 
   const last10Messages = await message.channel.messages.fetch({ limit: 20 });
-  const messages = last10Messages.map((msg) => `${msg.content}`).join("\n\n");
+  const messages = last10Messages
+    .map((msg) => `${msg.member?.displayName}: ${msg.content}`)
+    .join("\n");
 
-  const response = await openai.createCompletion("text-davinci-001", {
-    prompt: message.content,
+  const response = await openai.createEdit("text-davinci-edit-001", {
+    input: messages,
+    instruction: "Finish the conversation.",
     temperature: 0,
-    max_tokens: 64,
     top_p: 1,
-    best_of: 50,
-    frequency_penalty: 0,
-    presence_penalty: 0,
   });
 
   if (!response.data.choices) return;
