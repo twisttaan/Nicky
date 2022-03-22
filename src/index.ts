@@ -29,8 +29,12 @@ client.on("messageCreate", async (message: Message) => {
     .join("\n");
 
   const response = await openai.createEdit("text-davinci-edit-001", {
-    input: messages,
-    instruction: "Finish the conversation.",
+    input: `
+    ${messages}
+    nick: 
+    `,
+    instruction:
+      "Reply with what nick would say, nick is the super smart ai bot.",
     temperature: 0,
     top_p: 1,
   });
